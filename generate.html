@@ -5,26 +5,43 @@
     <title>generate</title>
   </head>
   <body>
+    <h2>1. Select CJK Dictionary</h2>
     <p>
-      CJK Dictionary<br>
       <input id="dict" type="text" value="sogou_dict.txt"/>
-      <button id="read">read dictionary</button>
+      <button id="load">Load CJK Dictionary</button>
     </p>
-    <p>
+      <p>
+        Not Chinese, Japanese, Korean website can be ignored.<br>
       CJK Dictionary size: <span id="dict_size" style="color:red;">0</span>
     </p>
-    <p>
-      URLs for Search engines spider<br>
-      <textarea id="urls" rows="10" cols="30">
-/index.html
-/test.html
-      </textarea>
-    </p>
+    <h2>2. Scan this website</h2>
     <p>
       <button id="scan">Scan</button>
+    </p>
+    <p>
+      Scan the starting URL list<br>
+      <textarea id="pages" rows="10" cols="30">
+[{"url":"/index.html","title":"home"},
+{"url":"/test.html","title":"test"}]
+      </textarea><br>
+      Remove the urls without an index.
+      <button id="resecan" disabled>Re secan</button>
+    </p>
+    <h2>3. Count this website use of keywords</h2>
+    <p>
       <button id="count" disabled>Count</button>
+    </p>
+    <p>
+      <textarea id="keywords" rows="10" cols="30">
+      </textarea><br>
+      Remove the meaningless keyword
+    </p>
+    <h2>4. Build and then download</h2>
+    <p>
+      <button id="builder" disabled>Builder</button>
       <button id="download" disabled>Download</button>
     </p>
+    Download the JSON file on the website root
     <script src="bower_components/jquery/dist/jquery.min.js"></script>
     <script src="spider.js"></script>
   </body>

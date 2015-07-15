@@ -5,34 +5,51 @@ Copyright (C) 2015 ender xu <xuender@gmail.com>
 Distributed under terms of the MIT license.
 ###
 DICT = []
-URLS = []
+PAGES = []
 OLDS = []
-STRS = {}
+KEYWORDS = {}
 DATA =
   dict: []
-  urls: {}
-addStr = (s)->
-  if s of STRS
-    STRS[s]++
-  else
-    STRS[s] = 1
+  pages: []
 
-count = (url, html)->
-  console.info url
+IGNORED = [
+  'the'
+  'an'
+  'of'
+  'then'
+]
+addStr = (s)->
+  if s of KEYWORDS
+    KEYWORDS[s]++
+  else
+    KEYWORDS[s] = 1
+
+count = (url, title, html)->
   w = /\w+/
+  page =
+    url: url
+    title: title
+    set: 0
+  notInPages = true
+  for p in DATA.pages
+    if p.url == url
+      page = p
+      notInPage = false
   for s in html.split(/\W+/)
     if s and w.test(s)
-      for k, v of STRS
+      for k, v of KEYWORDS
         if s == k
           # TODO 计算集合
-          DATA.urls[url] = v
+          page.set = v
           break
     else
-      for k, v of STRS
+      for k, v of KEYWORDS
         if s.indexOf(k) >= 0
           # TODO 计算集合
-          DATA.urls[url] = v
+          pages.set = v
           break
+  if notInPages
+    DATA.pages.push page
 
 read = (html)->
   w = /\w+/
@@ -44,42 +61,61 @@ read = (html)->
       addStr(s.toLowerCase())
   1
 
-secan = ->
-  if URLS.length > 0
-    url = $.trim(URLS.pop())
+inPages = (url, pages=PAGES)->
+  for p in pages
+    if url == p.url
+      return true
+  false
+
+secan =(find=true) ->
+  if PAGES.length > 0
+    url = PAGES.pop()
     if url
       OLDS.push url
-      $('#urls').val(OLDS.join('\n'))
+      $('#pages').val(JSON.stringify(OLDS))
       div = $('<div></div>')
-      h = div.load(url, (html)->
+      h = div.load(url.url, (html)->
         read($(this).text())
-        $(this).contents('a').each((i, a)->
-          href = $(a).attr('href')
-          if href and (not (':' in href)) and (not (href in URLS)) and (not (href in OLDS))
-            URLS.push href
-            secan()
-        )
+        console.info 'find',find
+        if find
+          $(this).contents('a').each((i, a)->
+            al = $(a)
+            href = al.attr('href')
+            if href and (not (':' in href)) and (not inPages(href)) and (not inPages(href, OLDS))
+              PAGES.push
+                url: href
+                title: al.text()
+              secan(find)
+          )
       )
-    secan()
+    secan(find)
 
 $ ->
-  $('#read').click(->
+  $('#load').click(->
     $.get($('#dict').val(), (txt)->
       DICT = txt.split('\n')
       $('#dict_size').text(DICT.length)
     )
   )
   $('#scan').click(->
-    URLS = $('#urls').val().split('\n')
+    PAGES = JSON.parse($('#pages').val())
     if DICT.length > 0 or confirm('Ignore CJK Dictionary?')
       OLDS = []
       secan()
       $('#count').attr("disabled",false)
+      $('#resecan').attr("disabled",false)
   )
+
+  $('#resecan').click(->
+    OLDS = []
+    PAGES = JSON.parse($('#pages').val())
+    KEYWORDS={}
+    secan(false)
+  )
+
   $('#count').click(->
-    $('#download').attr("disabled",false)
     temp = []
-    for k,v of STRS
+    for k,v of KEYWORDS
       temp.push(
         k:k
         v:v
@@ -88,14 +124,21 @@ $ ->
     for t in temp.sort((a, b)->
       b.v - a.v
     )
-      DATA.dict.push(t.k)
+      if t.k not in IGNORED
+        DATA.dict.push(t.k)
+    $('#keywords').val(JSON.stringify(DATA.dict))
+    $('#builder').attr("disabled",false)
+  )
+
+  $('#builder').click(->
     for d, i in DATA.dict
-      STRS[d] = i
-    for url in OLDS
-      div = $("<div data-url=#{url}></div>")
-      h = div.load(url, (html)->
-        count($(this).attr('data-url'), $(this).text())
+      KEYWORDS[d] = i
+    for p in OLDS
+      div = $("<div data-url='#{p.url}' data-title='#{p.title}'></div>")
+      h = div.load(p.url, (html)->
+        count($(this).attr('data-url'), $(this).attr('data-title'), $(this).text())
       )
+    $('#download').attr("disabled",false)
   )
   $('#download').click(->
     a = $("<a download='mse.json' href='data:text/plain,#{JSON.stringify(DATA)}'></a>")
