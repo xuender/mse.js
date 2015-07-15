@@ -1,0 +1,30 @@
+{
+  "name": "mse",
+  "version": "0.0.1",
+  "authors": [
+    "徐晨阳 <xuender@gmail.com>"
+  ],
+  "description": "Mini search engine for JavaScript",
+  "main": "mse.js",
+  "moduleType": [
+    "node"
+  ],
+  "keywords": [
+    "mini",
+    "search",
+    "engine",
+    "mse"
+  ],
+  "license": "MIT",
+  "homepage": "http://www.oldbean.cn/o/mse.html",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "devDependencies": {
+    "jquery": "~2.1.4"
+  }
+}

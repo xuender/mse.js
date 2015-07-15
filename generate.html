@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>generate</title>
+  </head>
+  <body>
+    <p>
+      CJK Dictionary<br>
+      <input id="dict" type="text" value="sogou_dict.txt"/>
+      <button id="read">read dictionary</button>
+    </p>
+    <p>
+      CJK Dictionary size: <span id="dict_size" style="color:red;">0</span>
+    </p>
+    <p>
+      URLs for Search engines spider<br>
+      <textarea id="urls" rows="10" cols="30">
+/index.html
+/test.html
+      </textarea>
+    </p>
+    <p>
+      <button id="scan">Scan</button>
+      <button id="count" disabled>Count</button>
+      <button id="download" disabled>Download</button>
+    </p>
+    <script src="bower_components/jquery/dist/jquery.min.js"></script>
+    <script src="spider.js"></script>
+  </body>
+</html>
+
