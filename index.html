@@ -28,7 +28,7 @@ search = function(kw, cb) {
   if (MSE) {
     MSE.search(kw, cb);
   } else {
-    $.getJSON('/mse.json', function(config) {
+    $.getJSON('mse.json', function(config) {
       MSE = new Mini(config);
       MSE.search(kw, cb);
     });
