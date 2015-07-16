@@ -8,7 +8,20 @@ Mini Search Engine for JavaScript
 
 1. Upload file generate.html spider.js mse.min.js to website;
 2. Open generate.html;
-3. Generate mse.json
+3. Generate mse.json;
 4. Upload mse.json to website;
-5. Add search box. [Example](https://github.com/xuender/mse.js/blob/gh-pages/index.html)
+5. Add search box; [Example](https://github.com/xuender/mse.js/blob/gh-pages/index.html)
 6. Remove generate.html and spider.js
+
+## Feature ##
+
+1. 2k size;
+2. Very fast;
+3. No database;
+4. Can run on any web server;
+5. Do not require application server support;
+
+## Fault ##
+
+1. No support for large web sites;
+2. Website content changes need to re generate the index;

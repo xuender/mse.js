@@ -1,8 +1,8 @@
 {
-  "name": "mse",
+  "name": "mse.js",
   "version": "0.0.1",
   "description": "Mini search engine for JavaScript",
-  "main": "mse.js",
+  "main": "mse.min.js",
   "dependencies": {},
   "devDependencies": {
     "coffee-script": "^1.9.3",
