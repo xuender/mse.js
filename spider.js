@@ -98,7 +98,7 @@ Copyright (C) 2015 ender xu <xuender@gmail.com>
 
 Distributed under terms of the MIT license.
  */
-var DATA, DICT, IGNORED, KEYWORDS, OLDS, PAGES, addStr, count, inPages, read, secan,
+var DATA, DICT, IGNORED, KEYWORDS, OLDS, PAGES, TEMP, addPage, addStr, count, read, scan,
   indexOf = [].indexOf || function(item) { for (var i = 0, l = this.length; i < l; i++) { if (i in this && this[i] === item) return i; } return -1; };
 
 DICT = [];
@@ -107,6 +107,8 @@ PAGES = [];
 
 OLDS = [];
 
+TEMP = [];
+
 KEYWORDS = {};
 
 DATA = {
@@ -114,7 +116,7 @@ DATA = {
   pages: []
 };
 
-IGNORED = ['the', 'an', 'of', 'then'];
+IGNORED = ['be', 'a', 'to', 'for', 'the', 'an', 'of', 'then'];
 
 addStr = function(s) {
   if (s in KEYWORDS) {
@@ -126,6 +128,7 @@ addStr = function(s) {
 
 count = function(url, title, html) {
   var j, k, l, len, len1, notInPage, notInPages, p, page, ref, ref1, s, v, w;
+  console.info('count', url);
   w = /\w+/;
   page = {
     url: url,
@@ -184,50 +187,74 @@ read = function(html) {
   return 1;
 };
 
-inPages = function(url, pages) {
-  var j, len, p;
-  if (pages == null) {
-    pages = PAGES;
+addPage = function(url) {
+  var j, l, len, len1, len2, m, p;
+  if (indexOf.call(url, ':') >= 0) {
+    return;
   }
-  for (j = 0, len = pages.length; j < len; j++) {
-    p = pages[j];
+  for (j = 0, len = TEMP.length; j < len; j++) {
+    p = TEMP[j];
     if (url === p.url) {
-      return true;
+      return;
     }
   }
-  return false;
+  for (l = 0, len1 = OLDS.length; l < len1; l++) {
+    p = OLDS[l];
+    if (url === p.url) {
+      return;
+    }
+  }
+  for (m = 0, len2 = PAGES.length; m < len2; m++) {
+    p = PAGES[m];
+    if (url === p.url) {
+      return;
+    }
+  }
+  return PAGES.push({
+    url: url,
+    title: ''
+  });
 };
 
-secan = function(find) {
-  var div, h, url;
+scan = function(find) {
+  var div, h, page;
   if (find == null) {
     find = true;
   }
   if (PAGES.length > 0) {
-    url = PAGES.pop();
-    if (url) {
-      OLDS.push(url);
-      $('#pages').val(JSON.stringify(OLDS));
-      div = $('<div></div>');
-      h = div.load(url.url, function(html) {
-        read($(this).text());
-        if (find) {
-          return $(this).contents('a').each(function(i, a) {
-            var al, href;
-            al = $(a);
-            href = al.attr('href');
-            if (href && (!(indexOf.call(href, ':') >= 0)) && (!inPages(href)) && (!inPages(href, OLDS))) {
-              PAGES.push({
-                url: href,
-                title: al.text()
-              });
-              return secan(find);
-            }
-          });
+    page = PAGES.pop();
+    if (page.url) {
+      TEMP.push(page);
+      console.info('pop page.url:', page.url);
+      div = $("<div></div>");
+      div.data('page', page);
+      h = div.load(page.url, function(html, status) {
+        if (status !== 'success') {
+          return;
         }
+        read(html);
+        page = $(this).data('page');
+        page['title'] = $(this).find('title').text();
+        if (page) {
+          console.info('page.url:', page.url);
+          OLDS.push(page);
+          $('#pages').val(JSON.stringify(OLDS));
+        }
+        if (!find) {
+          return;
+        }
+        return $(this).find('a').each(function(i, a) {
+          var al, href;
+          al = $(a);
+          href = Mini.getUrl(page.url, al.attr('href'));
+          if (href) {
+            addPage(href);
+            return scan(find);
+          }
+        });
       });
     }
-    return secan(find);
+    return scan(find);
   }
 };
 
@@ -242,16 +269,18 @@ $(function() {
     PAGES = JSON.parse($('#pages').val());
     if (DICT.length > 0 || confirm('Ignore CJK Dictionary?')) {
       OLDS = [];
-      secan();
+      TEMP = [];
+      scan();
       $('#count').attr("disabled", false);
-      return $('#resecan').attr("disabled", false);
+      return $('#rescan').attr("disabled", false);
     }
   });
-  $('#resecan').click(function() {
+  $('#rescan').click(function() {
     OLDS = [];
+    TEMP = [];
     PAGES = JSON.parse($('#pages').val());
     KEYWORDS = {};
-    return secan(false);
+    return scan(false);
   });
   $('#count').click(function() {
     var j, k, len, ref, ref1, t, temp, v;
@@ -285,9 +314,12 @@ $(function() {
     }
     for (l = 0, len1 = OLDS.length; l < len1; l++) {
       p = OLDS[l];
-      div = $("<div data-url='" + p.url + "' data-title='" + p.title + "'></div>");
+      div = $("<div></div>");
+      div.data('page', p);
       h = div.load(p.url, function(html) {
-        return count($(this).attr('data-url'), $(this).attr('data-title'), $(this).text());
+        var page;
+        page = $(this).data('page');
+        return count(page.url, page.title, $(this).text());
       });
     }
     return $('#download').attr("disabled", false);

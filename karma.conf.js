@@ -16,6 +16,7 @@ module.exports = function(config) {
     // list of files / patterns to load in the browser
     files: [
       'src/set.coffee',
+      'src/mini.coffee',
       'test/**/*Spec.coffee'
     ],
 

@@ -40,6 +40,20 @@ class Mini
         ret.push p
     cb(ret)
 
+  @getUrl: (p, a)->
+    a = a.split('#')[0]
+    if '/' == a[0]
+      return a[1..]
+    if './' == a[0...2]
+      a = a[2..]
+    if '/' in p
+      p = p[..p.lastIndexOf('/') - 1]
+      if '../' == a[0...3]
+        return Mini.getUrl(p, a[3..])
+      return "#{p}/#{a}"
+    else
+      return a
+
 MSE = null
 
 search = (kw, cb)->

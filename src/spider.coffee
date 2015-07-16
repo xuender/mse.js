@@ -7,12 +7,17 @@ Distributed under terms of the MIT license.
 DICT = []
 PAGES = []
 OLDS = []
+TEMP = []
 KEYWORDS = {}
 DATA =
   dict: []
   pages: []
 
 IGNORED = [
+  'be'
+  'a'
+  'to'
+  'for'
   'the'
   'an'
   'of'
@@ -25,6 +30,7 @@ addStr = (s)->
     KEYWORDS[s] = 1
 
 count = (url, title, html)->
+  console.info 'count', url
   w = /\w+/
   page =
     url: url
@@ -57,33 +63,51 @@ read = (html)->
       addStr(s.toLowerCase())
   1
 
-inPages = (url, pages=PAGES)->
-  for p in pages
+addPage = (url)->
+  if ':' in url
+    return
+  for p in TEMP
     if url == p.url
-      return true
-  false
+      return
+  for p in OLDS
+    if url == p.url
+      return
+  for p in PAGES
+    if url == p.url
+      return
+  PAGES.push
+    url: url
+    title: ''
 
-secan =(find=true) ->
+scan = (find=true) ->
   if PAGES.length > 0
-    url = PAGES.pop()
-    if url
-      OLDS.push url
-      $('#pages').val(JSON.stringify(OLDS))
-      div = $('<div></div>')
-      h = div.load(url.url, (html)->
-        read($(this).text())
-        if find
-          $(this).contents('a').each((i, a)->
-            al = $(a)
-            href = al.attr('href')
-            if href and (not (':' in href)) and (not inPages(href)) and (not inPages(href, OLDS))
-              PAGES.push
-                url: href
-                title: al.text()
-              secan(find)
-          )
+    page= PAGES.pop()
+    if page.url
+      TEMP.push page
+      console.info 'pop page.url:', page.url
+      div = $("<div></div>")
+      div.data('page', page)
+      h = div.load(page.url, (html, status)->
+        if status !='success'
+          return
+        read(html)
+        page = $(this).data('page')
+        page['title'] = $(this).find('title').text()
+        if page
+          console.info 'page.url:',page.url
+          OLDS.push page
+          $('#pages').val(JSON.stringify(OLDS))
+        if not find
+          return
+        $(this).find('a').each((i, a)->
+          al = $(a)
+          href = Mini.getUrl(page.url, al.attr('href'))
+          if href
+            addPage(href)
+            scan(find)
+        )
       )
-    secan(find)
+    scan(find)
 
 $ ->
   $('#load').click(->
@@ -96,16 +120,18 @@ $ ->
     PAGES = JSON.parse($('#pages').val())
     if DICT.length > 0 or confirm('Ignore CJK Dictionary?')
       OLDS = []
-      secan()
+      TEMP = []
+      scan()
       $('#count').attr("disabled",false)
-      $('#resecan').attr("disabled",false)
+      $('#rescan').attr("disabled",false)
   )
 
-  $('#resecan').click(->
+  $('#rescan').click(->
     OLDS = []
+    TEMP = []
     PAGES = JSON.parse($('#pages').val())
     KEYWORDS={}
-    secan(false)
+    scan(false)
   )
 
   $('#count').click(->
@@ -129,9 +155,11 @@ $ ->
     for d, i in DATA.dict
       KEYWORDS[d] = i
     for p in OLDS
-      div = $("<div data-url='#{p.url}' data-title='#{p.title}'></div>")
+      div = $("<div></div>")
+      div.data('page', p)
       h = div.load(p.url, (html)->
-        count($(this).attr('data-url'), $(this).attr('data-title'), $(this).text())
+        page = $(this).data('page')
+        count(page.url, page.title, $(this).text())
       )
     $('#download').attr("disabled",false)
   )
