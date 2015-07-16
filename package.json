@@ -1,6 +1,6 @@
 {
   "name": "mse.js",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "Mini search engine for JavaScript",
   "main": "mse.min.js",
   "dependencies": {},
