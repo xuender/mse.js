@@ -8,6 +8,7 @@ karma = require('karma').server
 
 gulp.task('coffee', ->
   gulp.src([
+    'src/set.coffee'
     'src/spider.coffee'
   ])
     .pipe(coffee({bare:true}))
@@ -16,6 +17,7 @@ gulp.task('coffee', ->
     .pipe(livereload())
   gulp.src([
     'src/set.coffee'
+    'src/mini.coffee'
   ])
     .pipe(coffee({bare:true}))
     .pipe(concat('mse.min.js'))
@@ -32,9 +34,9 @@ gulp.task('watch', ->
   gulp.watch('src/**/*.coffee', ['coffee'])
   gulp.watch("*.html").on 'change', livereload.changed
 
-  #karma.start(
-  #  configFile: __dirname + '/karma.conf.js',
-  #)
+  karma.start(
+    configFile: __dirname + '/karma.conf.js',
+  )
 )
 
 gulp.task('test', ->

@@ -5,23 +5,59 @@ Copyright (C) 2015 ender xu <xuender@gmail.com>
 
 Distributed under terms of the MIT license.
  */
-var Set;
+var Set,
+  bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; };
 
 Set = (function() {
-  function Set(arr) {
-    this.arr = arr != null ? arr : [];
+  function Set(set) {
+    this.set = set != null ? set : [];
+    this["in"] = bind(this["in"], this);
+    this.add = bind(this.add, this);
   }
 
-  Set.intersection = function(x, y) {
-    var i, j, len, ret, t;
-    ret = [];
-    for (i = j = 0, len = x.length; j < len; i = ++j) {
-      t = x[i];
-      if (y[i]) {
-        ret[i] = y[i] & t;
+  Set.prototype.add = function(arg) {
+    var i, j, len, results, t;
+    if (arg instanceof Array) {
+      results = [];
+      for (i = j = 0, len = arg.length; j < len; i = ++j) {
+        t = arg[i];
+        if (this.set[i]) {
+          results.push(this.set[i] = this.set[i] | t);
+        } else {
+          results.push(this.set[i] = t);
+        }
+      }
+      return results;
+    } else {
+      return this.add(Set.toArray(arg));
+    }
+  };
+
+  Set.prototype["in"] = function(array) {
+    var i, j, len, s, t;
+    for (i = j = 0, len = array.length; j < len; i = ++j) {
+      s = array[i];
+      if (s) {
+        t = s & this.set[i];
+        if (t !== s) {
+          return false;
+        }
       }
     }
-    return ret;
+    return true;
+  };
+
+  Set.toArray = function(num) {
+    var array, x, y;
+    array = [];
+    x = Math.floor(num / 32);
+    y = 1 << (num % 32);
+    if (array[x]) {
+      array[x] = array[x] | y;
+    } else {
+      array[x] = y;
+    }
+    return array;
   };
 
   Set.equal = function(x, y) {
@@ -39,6 +75,18 @@ Set = (function() {
     return true;
   };
 
+  Set.intersection = function(x, y) {
+    var i, j, len, ret, t;
+    ret = [];
+    for (i = j = 0, len = x.length; j < len; i = ++j) {
+      t = x[i];
+      if (y[i]) {
+        ret[i] = y[i] & t;
+      }
+    }
+    return ret;
+  };
+
   return Set;
 
 })();
@@ -50,71 +98,74 @@ Copyright (C) 2015 ender xu <xuender@gmail.com>
 
 Distributed under terms of the MIT license.
  */
-var DATA, DICT, OLDS, STRS, URLS, addStr, count, read, secan,
+var DATA, DICT, IGNORED, KEYWORDS, OLDS, PAGES, TEMP, addPage, addStr, count, read, scan,
   indexOf = [].indexOf || function(item) { for (var i = 0, l = this.length; i < l; i++) { if (i in this && this[i] === item) return i; } return -1; };
 
 DICT = [];
 
-URLS = [];
+PAGES = [];
 
 OLDS = [];
 
-STRS = {};
+TEMP = [];
+
+KEYWORDS = {};
 
 DATA = {
   dict: [],
-  urls: {}
+  pages: []
 };
+
+IGNORED = ['be', 'a', 'to', 'for', 'the', 'an', 'of', 'then'];
 
 addStr = function(s) {
-  if (s in STRS) {
-    return STRS[s]++;
+  if (s in KEYWORDS) {
+    return KEYWORDS[s]++;
   } else {
-    return STRS[s] = 1;
+    return KEYWORDS[s] = 1;
   }
 };
 
-count = function(url, html) {
-  var j, k, len, ref, results, s, v, w;
-  console.info(url);
+count = function(url, title, html) {
+  var j, k, l, len, len1, notInPage, notInPages, p, page, ref, ref1, s, v, w;
+  console.info('count', url);
   w = /\w+/;
-  ref = html.split(/\W+/);
-  results = [];
+  page = {
+    url: url,
+    title: title,
+    set: new Set()
+  };
+  notInPages = true;
+  ref = DATA.pages;
   for (j = 0, len = ref.length; j < len; j++) {
-    s = ref[j];
-    if (s && w.test(s)) {
-      results.push((function() {
-        var results1;
-        results1 = [];
-        for (k in STRS) {
-          v = STRS[k];
-          if (s === k) {
-            DATA.urls[url] = v;
-            break;
-          } else {
-            results1.push(void 0);
-          }
-        }
-        return results1;
-      })());
-    } else {
-      results.push((function() {
-        var results1;
-        results1 = [];
-        for (k in STRS) {
-          v = STRS[k];
-          if (s.indexOf(k) >= 0) {
-            DATA.urls[url] = v;
-            break;
-          } else {
-            results1.push(void 0);
-          }
-        }
-        return results1;
-      })());
+    p = ref[j];
+    if (p.url === url) {
+      page = p;
+      notInPage = false;
     }
   }
-  return results;
+  ref1 = html.split(/\W+/);
+  for (l = 0, len1 = ref1.length; l < len1; l++) {
+    s = ref1[l];
+    if (s && w.test(s)) {
+      for (k in KEYWORDS) {
+        v = KEYWORDS[k];
+        if (s === k) {
+          page.set.add(v);
+          break;
+        }
+      }
+    }
+  }
+  for (k in KEYWORDS) {
+    v = KEYWORDS[k];
+    if (html.indexOf(k) >= 0) {
+      page.set.add(v);
+    }
+  }
+  if (notInPages) {
+    return DATA.pages.push(page);
+  }
 };
 
 read = function(html) {
@@ -136,51 +187,106 @@ read = function(html) {
   return 1;
 };
 
-secan = function() {
-  var div, h, url;
-  if (URLS.length > 0) {
-    url = $.trim(URLS.pop());
-    if (url) {
-      OLDS.push(url);
-      $('#urls').val(OLDS.join('\n'));
-      div = $('<div></div>');
-      h = div.load(url, function(html) {
-        read($(this).text());
-        return $(this).contents('a').each(function(i, a) {
-          var href;
-          href = $(a).attr('href');
-          if (href && (!(indexOf.call(href, ':') >= 0)) && (!(indexOf.call(URLS, href) >= 0)) && (!(indexOf.call(OLDS, href) >= 0))) {
-            URLS.push(href);
-            return secan();
+addPage = function(url) {
+  var j, l, len, len1, len2, m, p;
+  if (indexOf.call(url, ':') >= 0) {
+    return;
+  }
+  for (j = 0, len = TEMP.length; j < len; j++) {
+    p = TEMP[j];
+    if (url === p.url) {
+      return;
+    }
+  }
+  for (l = 0, len1 = OLDS.length; l < len1; l++) {
+    p = OLDS[l];
+    if (url === p.url) {
+      return;
+    }
+  }
+  for (m = 0, len2 = PAGES.length; m < len2; m++) {
+    p = PAGES[m];
+    if (url === p.url) {
+      return;
+    }
+  }
+  return PAGES.push({
+    url: url,
+    title: ''
+  });
+};
+
+scan = function(find) {
+  var div, h, page;
+  if (find == null) {
+    find = true;
+  }
+  if (PAGES.length > 0) {
+    page = PAGES.pop();
+    if (page.url) {
+      TEMP.push(page);
+      console.info('pop page.url:', page.url);
+      div = $("<div></div>");
+      div.data('page', page);
+      h = div.load(page.url, function(html, status) {
+        if (status !== 'success') {
+          return;
+        }
+        read(html);
+        page = $(this).data('page');
+        page['title'] = $(this).find('title').text();
+        if (page) {
+          console.info('page.url:', page.url);
+          OLDS.push(page);
+          $('#pages').val(JSON.stringify(OLDS));
+        }
+        if (!find) {
+          return;
+        }
+        return $(this).find('a').each(function(i, a) {
+          var al, href;
+          al = $(a);
+          href = Mini.getUrl(page.url, al.attr('href'));
+          if (href) {
+            addPage(href);
+            return scan(find);
           }
         });
       });
     }
-    return secan();
+    return scan(find);
   }
 };
 
 $(function() {
-  $('#read').click(function() {
+  $('#load').click(function() {
     return $.get($('#dict').val(), function(txt) {
       DICT = txt.split('\n');
       return $('#dict_size').text(DICT.length);
     });
   });
   $('#scan').click(function() {
-    URLS = $('#urls').val().split('\n');
+    PAGES = JSON.parse($('#pages').val());
     if (DICT.length > 0 || confirm('Ignore CJK Dictionary?')) {
       OLDS = [];
-      secan();
-      return $('#count').attr("disabled", false);
+      TEMP = [];
+      scan();
+      $('#count').attr("disabled", false);
+      return $('#rescan').attr("disabled", false);
     }
   });
+  $('#rescan').click(function() {
+    OLDS = [];
+    TEMP = [];
+    PAGES = JSON.parse($('#pages').val());
+    KEYWORDS = {};
+    return scan(false);
+  });
   $('#count').click(function() {
-    var d, div, h, i, j, k, l, len, len1, len2, m, ref, ref1, results, t, temp, url, v;
-    $('#download').attr("disabled", false);
+    var j, k, len, ref, ref1, t, temp, v;
     temp = [];
-    for (k in STRS) {
-      v = STRS[k];
+    for (k in KEYWORDS) {
+      v = KEYWORDS[k];
       temp.push({
         k: k,
         v: v
@@ -192,25 +298,39 @@ $(function() {
     });
     for (j = 0, len = ref.length; j < len; j++) {
       t = ref[j];
-      DATA.dict.push(t.k);
+      if (ref1 = t.k, indexOf.call(IGNORED, ref1) < 0) {
+        DATA.dict.push(t.k);
+      }
     }
-    ref1 = DATA.dict;
-    for (i = l = 0, len1 = ref1.length; l < len1; i = ++l) {
-      d = ref1[i];
-      STRS[d] = i;
+    $('#keywords').val(JSON.stringify(DATA.dict));
+    return $('#builder').attr("disabled", false);
+  });
+  $('#builder').click(function() {
+    var d, div, h, i, j, l, len, len1, p, ref;
+    ref = DATA.dict;
+    for (i = j = 0, len = ref.length; j < len; i = ++j) {
+      d = ref[i];
+      KEYWORDS[d] = i;
     }
-    results = [];
-    for (m = 0, len2 = OLDS.length; m < len2; m++) {
-      url = OLDS[m];
-      div = $("<div data-url=" + url + "></div>");
-      results.push(h = div.load(url, function(html) {
-        return count($(this).attr('data-url'), $(this).text());
-      }));
+    for (l = 0, len1 = OLDS.length; l < len1; l++) {
+      p = OLDS[l];
+      div = $("<div></div>");
+      div.data('page', p);
+      h = div.load(p.url, function(html) {
+        var page;
+        page = $(this).data('page');
+        return count(page.url, page.title, $(this).text());
+      });
     }
-    return results;
+    return $('#download').attr("disabled", false);
   });
   return $('#download').click(function() {
-    var a, evt;
+    var a, d, evt, j, len, ref;
+    ref = DATA.pages;
+    for (j = 0, len = ref.length; j < len; j++) {
+      d = ref[j];
+      d['set'] = d['set']['set'];
+    }
     a = $("<a download='mse.json' href='data:text/plain," + (JSON.stringify(DATA)) + "'></a>");
     evt = document.createEvent("HTMLEvents");
     evt.initEvent("click", false, false);
