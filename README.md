@@ -1,5 +1,7 @@
 # MSE.js #
 
+[![Build Status](https://travis-ci.org/xuender/mse.js.svg)](https://travis-ci.org/xuender/mse.js)
+
 Mini Search Engine for JavaScript
 
 ## How to use ##
