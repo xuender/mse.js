@@ -1,0 +1,26 @@
+/*
+ * wls.css
+ * Copyright (C) 2015 ender xu
+ *
+ * Distributed under terms of the MIT license.
+ */
+
+body {
+  background: rgb(250, 244, 199);
+  color: black;
+  width: 970px;
+  font-size: 2em;
+  padding-right: 35px;
+  padding-left: 35px;
+  margin-right: auto;
+  margin-left: auto;
+}
+
+h1,h2{
+  color: rgb(169, 10, 149);
+}
+
+p {
+  text-indent:2em;
+}
+
