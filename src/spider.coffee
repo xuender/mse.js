@@ -29,7 +29,7 @@ count = (url, title, html)->
   page =
     url: url
     title: title
-    set: 0
+    set: new Set()
   notInPages = true
   for p in DATA.pages
     if p.url == url
@@ -39,15 +39,11 @@ count = (url, title, html)->
     if s and w.test(s)
       for k, v of KEYWORDS
         if s == k
-          # TODO 计算集合
-          page.set = v
+          page.set.add(v)
           break
-    else
-      for k, v of KEYWORDS
-        if s.indexOf(k) >= 0
-          # TODO 计算集合
-          pages.set = v
-          break
+  for k, v of KEYWORDS
+    if html.indexOf(k) >= 0
+      page.set.add(v)
   if notInPages
     DATA.pages.push page
 
@@ -76,7 +72,6 @@ secan =(find=true) ->
       div = $('<div></div>')
       h = div.load(url.url, (html)->
         read($(this).text())
-        console.info 'find',find
         if find
           $(this).contents('a').each((i, a)->
             al = $(a)
@@ -140,7 +135,10 @@ $ ->
       )
     $('#download').attr("disabled",false)
   )
+
   $('#download').click(->
+    for d in DATA.pages
+      d['set'] = d['set']['set']
     a = $("<a download='mse.json' href='data:text/plain,#{JSON.stringify(DATA)}'></a>")
     evt = document.createEvent("HTMLEvents")
     evt.initEvent("click", false, false)
