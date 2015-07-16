@@ -8,4 +8,4 @@ Mini Search Engine for JavaScript
 1. Open generate.html;
 1. Generate mse.json
 1. Upload mse.json to website;
-1. Add search box.
+1. Add search box. [Example](https://github.com/xuender/mse.js/blob/gh-pages/index.html)
