@@ -89,12 +89,8 @@ scan = (find=true) ->
       h = div.load(page.url, (html, status)->
         if status !='success'
           return
-        t = ''
-        $(this).find(':not(script)').each((i, e)->
-          t=' '+$(e).text()
-        )
-        #read($(this).text())
-        read(t)
+        $(this).find('script').remove()
+        read($(this).text())
         page = $(this).data('page')
         console.info 'read:',page.url
         page['title'] = $(this).find('title').text()
@@ -162,6 +158,7 @@ $ ->
       div = $("<div></div>")
       div.data('page', p)
       h = div.load(p.url, (html)->
+        $(this).find('script').remove()
         page = $(this).data('page')
         count(page.url, page.title, $(this).text())
       )
