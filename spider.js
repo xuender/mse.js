@@ -128,7 +128,6 @@ addStr = function(s) {
 
 count = function(url, title, html) {
   var j, k, l, len, len1, notInPage, notInPages, p, page, ref, ref1, s, v, w;
-  console.info('count', url);
   w = /\w+/;
   page = {
     url: url,
@@ -164,8 +163,9 @@ count = function(url, title, html) {
     }
   }
   if (notInPages) {
-    return DATA.pages.push(page);
+    DATA.pages.push(page);
   }
+  return console.info('count:', url);
 };
 
 read = function(html) {
@@ -225,18 +225,22 @@ scan = function(find) {
     page = PAGES.pop();
     if (page.url) {
       TEMP.push(page);
-      console.info('pop page.url:', page.url);
       div = $("<div></div>");
       div.data('page', page);
       h = div.load(page.url, function(html, status) {
+        var t;
         if (status !== 'success') {
           return;
         }
-        read(html);
+        t = '';
+        $(this).find(':not(script)').each(function(i, e) {
+          return t = ' ' + $(e).text();
+        });
+        read(t);
         page = $(this).data('page');
+        console.info('read:', page.url);
         page['title'] = $(this).find('title').text();
         if (page) {
-          console.info('page.url:', page.url);
           OLDS.push(page);
           $('#pages').val(JSON.stringify(OLDS));
         }
