@@ -105,8 +105,6 @@ scan = (find=true) ->
       h = div.load(page.url, (html, status)->
         if status !='success'
           return
-        $(this).find('head,style,script,header,nav,footer,#footer').remove()
-        read($(this).text())
         page = $(this).data('page')
         console.info 'read:',page.url
         page['title'] = $(this).find('title').text()
@@ -118,10 +116,13 @@ scan = (find=true) ->
         $(this).find('a').each((i, a)->
           al = $(a)
           href = Mini.getUrl(page.url, al.attr('href'))
+          console.info 'href:', href
           if href
             addPage(href)
             scan(find)
         )
+        $(this).find('head,style,script,header,nav,footer,#footer').remove()
+        read($(this).text())
       )
     scan(find)
 

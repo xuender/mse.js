@@ -231,8 +231,6 @@ scan = function(find) {
         if (status !== 'success') {
           return;
         }
-        $(this).find('head,style,script,header,nav,footer,#footer').remove();
-        read($(this).text());
         page = $(this).data('page');
         console.info('read:', page.url);
         page['title'] = $(this).find('title').text();
@@ -243,15 +241,18 @@ scan = function(find) {
         if (!find) {
           return;
         }
-        return $(this).find('a').each(function(i, a) {
+        $(this).find('a').each(function(i, a) {
           var al, href;
           al = $(a);
           href = Mini.getUrl(page.url, al.attr('href'));
+          console.info('href:', href);
           if (href) {
             addPage(href);
             return scan(find);
           }
         });
+        $(this).find('head,style,script,header,nav,footer,#footer').remove();
+        return read($(this).text());
       });
     }
     return scan(find);
