@@ -1,6 +1,6 @@
 {
   "name": "mse.js",
-  "version": "0.0.4",
+  "version": "0.0.5",
   "authors": [
     "徐晨阳 <xuender@gmail.com>"
   ],
@@ -25,13 +25,14 @@
     "tests"
   ],
   "devDependencies": {},
-  "_release": "0.0.4",
+  "_release": "0.0.5",
   "_resolution": {
     "type": "version",
-    "tag": "0.0.4",
-    "commit": "27e2a2b17451c1c79334449c00bdcbdf2f0809b5"
+    "tag": "0.0.5",
+    "commit": "3bdffbbe800ed776cf71e2f1c61a281b5ddf781e"
   },
   "_source": "git://github.com/xuender/mse.js.git",
-  "_target": "~0.0.4",
-  "_originalSource": "mse.js"
+  "_target": "~0.0.5",
+  "_originalSource": "mse.js",
+  "_direct": true
 }

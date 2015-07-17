@@ -22,6 +22,22 @@ IGNORED = [
   'an'
   'of'
   'then'
+  'is'
+  'in'
+  'and'
+  'that'
+  'if'
+  'it'
+  'you'
+  'or'
+  'are'
+  'can'
+  'on'
+  'as'
+  'not'
+  'at'
+  'do'
+  'so'
 ]
 addStr = (s)->
   if s of KEYWORDS
@@ -89,8 +105,6 @@ scan = (find=true) ->
       h = div.load(page.url, (html, status)->
         if status !='success'
           return
-        $(this).find('script').remove()
-        read($(this).text())
         page = $(this).data('page')
         console.info 'read:',page.url
         page['title'] = $(this).find('title').text()
@@ -102,10 +116,13 @@ scan = (find=true) ->
         $(this).find('a').each((i, a)->
           al = $(a)
           href = Mini.getUrl(page.url, al.attr('href'))
+          console.info 'href:', href
           if href
             addPage(href)
             scan(find)
         )
+        $(this).find('head,style,script,header,nav,footer,#footer').remove()
+        read($(this).text())
       )
     scan(find)
 
@@ -158,7 +175,7 @@ $ ->
       div = $("<div></div>")
       div.data('page', p)
       h = div.load(p.url, (html)->
-        $(this).find('script').remove()
+        $(this).find('head,style,script,header,nav,footer,#footer').remove()
         page = $(this).data('page')
         count(page.url, page.title, $(this).text())
       )
