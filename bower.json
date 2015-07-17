@@ -26,6 +26,6 @@
   ],
   "devDependencies": {},
   "dependencies": {
-    "mse.js": "~0.0.3"
+    "mse.js": "~0.0.4"
   }
 }
