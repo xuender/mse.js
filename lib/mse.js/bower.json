@@ -1,11 +1,11 @@
 {
-  "name": "mse",
-  "version": "0.0.1",
+  "name": "mse.js",
+  "version": "0.0.2",
   "authors": [
     "徐晨阳 <xuender@gmail.com>"
   ],
   "description": "Mini search engine for JavaScript",
-  "main": "mse.js",
+  "main": "mse.min.js",
   "moduleType": [
     "node"
   ],
@@ -24,8 +24,5 @@
     "test",
     "tests"
   ],
-  "devDependencies": {},
-  "dependencies": {
-    "mse.js": "~0.0.3"
-  }
+  "devDependencies": {}
 }

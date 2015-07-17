@@ -1,11 +1,11 @@
 {
-  "name": "mse",
-  "version": "0.0.1",
+  "name": "mse.js",
+  "version": "0.0.3",
   "authors": [
     "徐晨阳 <xuender@gmail.com>"
   ],
   "description": "Mini search engine for JavaScript",
-  "main": "mse.js",
+  "main": "mse.min.js",
   "moduleType": [
     "node"
   ],
@@ -25,7 +25,14 @@
     "tests"
   ],
   "devDependencies": {},
-  "dependencies": {
-    "mse.js": "~0.0.3"
-  }
+  "_release": "0.0.3",
+  "_resolution": {
+    "type": "version",
+    "tag": "0.0.3",
+    "commit": "f52ea3f97e664fd1e3a41d4e3bbe345f48534857"
+  },
+  "_source": "git://github.com/xuender/mse.js.git",
+  "_target": "~0.0.3",
+  "_originalSource": "mse.js",
+  "_direct": true
 }
