@@ -116,7 +116,7 @@ DATA = {
   pages: []
 };
 
-IGNORED = ['be', 'a', 'to', 'for', 'the', 'an', 'of', 'then'];
+IGNORED = ['be', 'a', 'to', 'for', 'the', 'an', 'of', 'then', 'is', 'in', 'and', 'that', 'if', 'it', 'you', 'or', 'are', 'can', 'on', 'as', 'not', 'at', 'do', 'so'];
 
 addStr = function(s) {
   if (s in KEYWORDS) {
@@ -228,15 +228,11 @@ scan = function(find) {
       div = $("<div></div>");
       div.data('page', page);
       h = div.load(page.url, function(html, status) {
-        var t;
         if (status !== 'success') {
           return;
         }
-        t = '';
-        $(this).find(':not(script)').each(function(i, e) {
-          return t = ' ' + $(e).text();
-        });
-        read(t);
+        $(this).find('head,style,script,header,nav,footer,#footer').remove();
+        read($(this).text());
         page = $(this).data('page');
         console.info('read:', page.url);
         page['title'] = $(this).find('title').text();
@@ -322,6 +318,7 @@ $(function() {
       div.data('page', p);
       h = div.load(p.url, function(html) {
         var page;
+        $(this).find('head,style,script,header,nav,footer,#footer').remove();
         page = $(this).data('page');
         return count(page.url, page.title, $(this).text());
       });
