@@ -111,16 +111,14 @@ scan = (find=true) ->
         if page
           OLDS.push page
           $('#pages').val(JSON.stringify(OLDS))
-        if not find
-          return
-        $(this).find('a').each((i, a)->
-          al = $(a)
-          href = Mini.getUrl(page.url, al.attr('href'))
-          console.info 'href:', href
-          if href
-            addPage(href)
-            scan(find)
-        )
+        if find
+          $(this).find('a').each((i, a)->
+            al = $(a)
+            href = Mini.getUrl(page.url, al.attr('href'))
+            if href
+              addPage(href)
+              scan(find)
+          )
         $(this).find('head,style,script,header,nav,footer,#footer').remove()
         read($(this).text())
       )
