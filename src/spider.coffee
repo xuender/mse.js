@@ -30,7 +30,6 @@ addStr = (s)->
     KEYWORDS[s] = 1
 
 count = (url, title, html)->
-  console.info 'count', url
   w = /\w+/
   page =
     url: url
@@ -52,6 +51,7 @@ count = (url, title, html)->
       page.set.add(v)
   if notInPages
     DATA.pages.push page
+  console.info 'count:',url
 
 read = (html)->
   w = /\w+/
@@ -84,17 +84,21 @@ scan = (find=true) ->
     page= PAGES.pop()
     if page.url
       TEMP.push page
-      console.info 'pop page.url:', page.url
       div = $("<div></div>")
       div.data('page', page)
       h = div.load(page.url, (html, status)->
         if status !='success'
           return
-        read(html)
+        t = ''
+        $(this).find(':not(script)').each((i, e)->
+          t=' '+$(e).text()
+        )
+        #read($(this).text())
+        read(t)
         page = $(this).data('page')
+        console.info 'read:',page.url
         page['title'] = $(this).find('title').text()
         if page
-          console.info 'page.url:',page.url
           OLDS.push page
           $('#pages').val(JSON.stringify(OLDS))
         if not find

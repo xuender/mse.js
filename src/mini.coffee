@@ -43,16 +43,17 @@ class Mini
   @getUrl: (p, a)->
     a = a.split('#')[0]
     if '/' == a[0]
-      return a[1..]
+      return a
     if './' == a[0...2]
       a = a[2..]
-    if '/' in p
-      p = p[..p.lastIndexOf('/') - 1]
-      if '../' == a[0...3]
-        return Mini.getUrl(p, a[3..])
-      return "#{p}/#{a}"
-    else
-      return a
+    if '../' == a[0...3]
+      ps = p.split('/')
+      ps.pop()
+      return Mini.getUrl(ps.join('/'), a[3..])
+    ps = p.split('/')
+    ps.pop()
+    ps.push a
+    ps.join('/')
 
 MSE = null
 
